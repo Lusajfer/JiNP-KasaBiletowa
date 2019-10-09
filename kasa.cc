@@ -1,4 +1,14 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <string>
+#include <set>
+#include <vector>
+#include <regex>
+#include <math.h>
+#include <cstdio>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
 using namespace std;
 
 /**
@@ -20,10 +30,13 @@ bool checkTicketRequestCommand(string command) {
 }
 
 
-
 inline void printErr(int lineId, string line) {
     cerr << "Error in line " << lineId << ": " << line;
 }
+
+set <string> names;
+map <string, int> timetable;
+
 
 
 void getInput() {
@@ -41,7 +54,7 @@ void getInput() {
         }
         
         // determinowanie typu komendy za pomoca pierwszego znaku
-        if(isDigit(line[0]) {
+        if(isdigit(line[0])) {
             if(!checkBusRouteCommand(line)) {
                 printErr(lineId, line);
                 continue;
@@ -57,7 +70,7 @@ void getInput() {
         }
         else if(line[0] == '?') {
             if(!checkTicketRequestCommand(line)) {
-                printfErr(lineId, line);
+                printErr(lineId, line);
                 continue;
             }
             
