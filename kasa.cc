@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <map>
 
 using namespace std;
 
@@ -15,18 +16,22 @@ using namespace std;
  * tab to 4 spacje xDDD
  */
 
+const regex reg1("\\d+(\\s(5:5[5-9]|([6-9]|1[0-9]|20):\\d\\d|21:1[0-9]|21:2[0-1])\\s([a-zA-Z]|\\^)([a-zA-Z]|\\s|\\^)*)+");
+const regex reg2("[a-zA-Z]([a-zA-Z]|\\s)*\\s([1-9]\\d*|0)\\.\\d\\d\\s[1-9][0-9]*");
+const regex reg3("\\?(\\s[a-zA-Z]|\\^)([a-zA-Z]|\\s|\\^)*\\s\\d+)+");
+
 // zaimplementuj te 3 funkcje xdddddddddd
 // zwracaja true jesli linijka poprawna, false w przeciwnym
 bool checkBusRouteCommand(string command) {
-
+    return regex_match(command, reg1);
 }
 
 bool checkNewTicketCommand(string command) {
-
+    return regex_match(command, reg2);
 }
 
 bool checkTicketRequestCommand(string command) {
-
+    return regex_match(command, reg3);
 }
 
 
