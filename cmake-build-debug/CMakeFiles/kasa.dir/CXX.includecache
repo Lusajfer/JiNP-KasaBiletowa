@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/cezary/CLionProjects/JiNP-KasaBiletowa/kasa.cc
+iostream
+-
+string
+-
+set
+-
+vector
+-
+regex
+-
+cmath
+-
+cstdio
+-
+cstdlib
+-
+map
+-
+

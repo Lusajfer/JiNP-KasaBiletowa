@@ -3,70 +3,69 @@
 #include <set>
 #include <vector>
 #include <regex>
-#include <math.h>
+#include <cmath>
 #include <cstdio>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
+#include <cstdlib>
 #include <map>
 
-using namespace std;
+using ULL = unsigned long long;
 
-/**
- * tab to 4 spacje xDDD
- */
+const std::regex reg1("\\d+(\\s(5:5[5-9]|([6-9]|1[0-9]|20):\\d\\d|21:1[0-9]|21:2[0-1])\\s([a-zA-Z]|\\^)([a-zA-Z]|\\s|\\^)*)+");
+const std::regex reg2("[a-zA-Z]([a-zA-Z]|\\s)*\\s([1-9]\\d*|0)\\.\\d\\d\\s[1-9][0-9]*");
+const std::regex reg3("\\?((\\s[a-zA-Z]|\\^)([a-zA-Z]|\\s|\\^)*\\s\\d+)+");
 
-const regex reg1("\\d+(\\s(5:5[5-9]|([6-9]|1[0-9]|20):\\d\\d|21:1[0-9]|21:2[0-1])\\s([a-zA-Z]|\\^)([a-zA-Z]|\\s|\\^)*)+");
-const regex reg2("[a-zA-Z]([a-zA-Z]|\\s)*\\s([1-9]\\d*|0)\\.\\d\\d\\s[1-9][0-9]*");
-const regex reg3("\\?(\\s[a-zA-Z]|\\^)([a-zA-Z]|\\s|\\^)*\\s\\d+)+");
-
-// zaimplementuj te 3 funkcje xdddddddddd
-// zwracaja true jesli linijka poprawna, false w przeciwnym
-bool checkBusRouteCommand(string command) {
+bool checkBusRouteCommand(std::string command) {
     return regex_match(command, reg1);
 }
 
-bool checkNewTicketCommand(string command) {
+bool checkNewTicketCommand(std::string command) {
     return regex_match(command, reg2);
 }
 
-bool checkTicketRequestCommand(string command) {
+bool checkTicketRequestCommand(std::string command) {
     return regex_match(command, reg3);
 }
 
 
-inline void printErr(int lineId, string line) {
-    cerr << "Error in line " << lineId << ": " << line;
+inline void printErr(int lineId, std::string line) {
+    std::cerr << "Error in line " << lineId << ": " << line;
 }
 
-set <string> names;
-map <string, int> timetable;
 
+std::pair<std::string, std::vector<std::pair<int, std::string>>> parseBusRouteCommand(std::string command) {
 
+}
+
+std::tuple<std::string, ULL, int> parseNewTicketCommand(std::string command) {
+
+}
+
+std::pair<std::vector<std::string>, std::vector<std::string>> parseTicketRequestCommand(std::string command) {
+
+}
 
 void getInput() {
 
     int lineId = 0;
-    string line;
+    std::string line;
      
-    while(getline(cin, line)) {
+    while(getline(std::cin, line)) {
     
         lineId++;
-        
-        // pusta linijka
+
         if(line.empty()) {
             continue;
         }
-        
-        // determinowanie typu komendy za pomoca pierwszego znaku
-        if(isdigit(line[0])) {
+
+        if(isdigit(line[0]) || line[0] == '_' || line[0] == '^') {
             if(!checkBusRouteCommand(line)) {
                 printErr(lineId, line);
                 continue;
-            }        
-            
+            }
+
+
         } 
-        else if(isalpha(line[0]) || line[0] == '_' || line[0] == '^') {
+        else if(isalpha(line[0]) || isspace(line[0])) {
             if(!checkNewTicketCommand(line)) {
                 printErr(lineId, line);
                 continue;

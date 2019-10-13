@@ -1,0 +1,3 @@
+/home/cezary/CLionProjects/JiNP-KasaBiletowa/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/cezary/CLionProjects/JiNP-KasaBiletowa/cmake-build-debug/CMakeFiles/kasa.dir
+/home/cezary/CLionProjects/JiNP-KasaBiletowa/cmake-build-debug/CMakeFiles/edit_cache.dir
