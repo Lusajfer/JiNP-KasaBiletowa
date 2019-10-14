@@ -10,39 +10,43 @@
 #include <climits>
 
 using ULL = unsigned long long;
-using INF = 1e18 + 10;
+const ULL INF = 1e18 + 10;
+
+using BusRoute = std::pair<std::string, std::vector<std::pair<int, std::string>>>;
+using Ticket = std::tuple<std::string, ULL, int>;
+using TicketRequest = std::pair<std::vector<std::string>, std::vector<std::string>>;
 
 const std::regex reg1("\\d+(\\s(5:5[5-9]|([6-9]|1[0-9]|20):\\d\\d|21:1[0-9]|21:2[0-1])\\s([a-zA-Z]|\\^)([a-zA-Z]|\\s|\\^)*)+");
 const std::regex reg2("[a-zA-Z]([a-zA-Z]|\\s)*\\s([1-9]\\d*|0)\\.\\d\\d\\s[1-9][0-9]*");
 const std::regex reg3("\\?((\\s[a-zA-Z]|\\^)([a-zA-Z]|\\s|\\^)*\\s\\d+)+");
 
-bool checkBusRouteCommand(std::string command) {
+bool checkBusRouteCommand(const std::string& command) {
     return regex_match(command, reg1);
 }
 
-bool checkNewTicketCommand(std::string command) {
+bool checkNewTicketCommand(const std::string& command) {
     return regex_match(command, reg2);
 }
 
-bool checkTicketRequestCommand(std::string command) {
+bool checkTicketRequestCommand(const std::string& command) {
     return regex_match(command, reg3);
 }
 
 
-inline void printErr(int lineId, std::string line) {
+inline void printErr(int lineId, const std::string& line) {
     std::cerr << "Error in line " << lineId << ": " << line;
 }
 
 
-std::pair<std::string, std::vector<std::pair<int, std::string>>> parseBusRouteCommand(std::string command) {
+BusRoute parseBusRouteCommand(const std::string& command) {
 
 }
 
-std::tuple<std::string, ULL, int> parseNewTicketCommand(std::string command) {
+Ticket parseNewTicketCommand(const std::string& command) {
 
 }
 
-std::pair<std::vector<std::string>, std::vector<std::string>> parseTicketRequestCommand(std::string command) {
+TicketRequest parseTicketRequestCommand(const std::string& command) {
 
 }
 
@@ -53,9 +57,9 @@ std::pair<std::vector<std::string>, std::vector<std::string>> parseTicketRequest
 
 std::map<std::string, std::map<int, std::string>> busRoutes;
 std::map<std::string, std::map<std::string, int>> busStops;
-std::vector<std::tuple<std::string, ULL, int>> tickets;
+std::vector<Ticket> tickets;
 
-void executeBusRoute(std::pair<std::string, std::vector<std::pair<int, std::string>>> busRoute) {
+void executeBusRoute(const BusRoute& busRoute) {
     auto name = busRoute.first;
     auto timetable = busRoute.second;
     
@@ -68,14 +72,14 @@ void executeBusRoute(std::pair<std::string, std::vector<std::pair<int, std::stri
     }
 }
 
-void executeNewTicket(std::tuple<std::string, ULL, int> ticket) {
-    tickets.push_back(cmd);
+void executeNewTicket(const Ticket& ticket) {
+    tickets.push_back(ticket);
 }
 
-bool executeTicketRequest(std::pair<std::vector<std::string>, std::vector<std::string>> busRide) {
+std::string executeTicketRequest(const TicketRequest& ticketRequest) {
     int time = 0;
-    auto stops = busRide.first;
-    auto routes = busRide.second;
+    auto stops = ticketRequest.first;
+    auto routes = ticketRequest.second;
     int prevTimestamp = busStops[stops[0]][routes[0]];
     
     for(int i = 0; i < stops.size(); i++) {
@@ -87,8 +91,7 @@ bool executeTicketRequest(std::pair<std::vector<std::string>, std::vector<std::s
         int nextTime = busStops[currStop][nextRoute];
         
         if(prevTime != nextTime) {
-            // wypisac nazwe przystanku
-            return false;
+            return ":-(" + currStop;
         }
         
         time += prevTime - prevTimestamp + 1;
@@ -96,7 +99,7 @@ bool executeTicketRequest(std::pair<std::vector<std::string>, std::vector<std::s
     }
     
     
-    std::vector<std::string>> bestTickets;
+    std::vector<std::string> bestTickets;
     ULL lowestPrice = INF;
     
     if(tickets.size() >= 1) {    
@@ -145,13 +148,14 @@ bool executeTicketRequest(std::pair<std::vector<std::string>, std::vector<std::s
         }
     } 
     
-    if(bestTickets.size() == 0) {
+    if(bestTickets.empty()) {
         // nie znaleziono odpowiedniego biletu lub nie ma biletow
+
         return false;
     }
     
     // wypisac bilety z bestTickets;
-    
+
     return true;
 }
 
@@ -176,21 +180,23 @@ void getInput() {
                 continue;
             }
 
-
+            executeBusRoute(parseBusRouteCommand(line));
         } 
         else if(isalpha(line[0]) || isspace(line[0])) {
             if(!checkNewTicketCommand(line)) {
                 printErr(lineId, line);
                 continue;
             }
-            
+
+            executeNewTicket(parseNewTicketCommand(line));
         }
         else if(line[0] == '?') {
             if(!checkTicketRequestCommand(line)) {
                 printErr(lineId, line);
                 continue;
             }
-            
+
+            std::cout << executeTicketRequest(parseTicketRequestCommand(line));
         }
         else {
             printErr(lineId, line);
