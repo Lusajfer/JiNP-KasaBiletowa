@@ -72,22 +72,6 @@ void executeNewTicket(std::tuple<std::string, ULL, int> ticket) {
     tickets.push_back(cmd);
 }
 
-ULL checkTickets(std::vector<std::tuple<std::string, ULL, int> toCheck, int time) {
-    int sumTime = 0;
-    ULL sumPrice = 0LL;
-    
-    for(auto t : toCheck) {
-        sumTime += std::get<2>(t);
-        sumPrice += std::get<1>(t);
-    }
-    
-    if(sumTime < time) {
-        return INF;
-    }
-    
-    return sumPrice;
-}
-
 bool executeTicketRequest(std::pair<std::vector<std::string>, std::vector<std::string>> busRide) {
     int time = 0;
     auto stops = busRide.first;
@@ -118,9 +102,13 @@ bool executeTicketRequest(std::pair<std::vector<std::string>, std::vector<std::s
     if(tickets.size() >= 1) {    
         for(int i = 0; i < tickets.size(); i++) {
         
-            auto currScore = checkTickets({tickets[i], time});
-            if(currScore.first && lowestPric) {  
+            if(std::get<2>(tickets[i]) >= time) {
+                ULL currPrice = std::get<1>(tickets[i]);
                 
+                if(currPrice < lowestPrice) {
+                    lowestPrice = currPrice;
+                    bestTickets = {std::get<0>(tickets[i])};
+                }
             }
         }
     } 
