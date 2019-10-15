@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/kasa.dir/kasa.cc.o"
-  "kasa.pdb"
   "kasa"
+  "kasa.pdb"
 )
 
 # Per-language clean rules from dependency scanning.
