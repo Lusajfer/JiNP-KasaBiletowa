@@ -81,7 +81,6 @@ std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command,
                 return {false, {}};
             }
             else {
-                ticketNameSet.insert(matchStr);
                 ticketName = matchStr;
             }
         }
@@ -104,6 +103,7 @@ std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command,
         }
     }
 
+    ticketNameSet.insert(ticketName);
     return {true, {ticketName, ticketPrice, ticketDur}};
 }
 
@@ -126,7 +126,6 @@ std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command,
         return {false, {}};
     }
     else {
-        lineNumSet.insert(lineNum);
         busRoute.second.first = lineNum;
     }
 
@@ -140,9 +139,9 @@ std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command,
     std::vector<int> stopTimes;
     int mins;
     int mxMins = -1;
- 
+
     for (std::sregex_iterator i = itBegin; i != itEnd; ++i) {
-        std::smatch match = *i;                                                 
+        std::smatch match = *i;
         std::string matchStr = match.str();
         if(std::regex_match(matchStr, stopsReg)) {
             if(stopsSet.find(matchStr) != stopsSet.end()) {
@@ -166,9 +165,11 @@ std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command,
         }
     }
 
-   std::pair<int, std::string> p;
+    lineNumSet.insert(lineNum);
+
+    std::pair<int, std::string> p;
     for(size_t i = 0; i < stopTimes.size(); i++) {
-        p.first = stopTimes[i]; 
+        p.first = stopTimes[i];
         p.second = stops[i];
         busRoute.second.second.push_back(p);
     }
