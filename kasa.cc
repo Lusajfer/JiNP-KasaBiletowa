@@ -77,7 +77,7 @@ std::string executeTicketRequest(const TicketRequest& ticketRequest) {
     auto routes = ticketRequest.second;
     int prevTimestamp = busStops[stops[0]][routes[0]];
     
-    for(int i = 0; i < stops.size(); i++) {
+    for(size_t i = 0; i < stops.size(); i++) {
         auto currStop = stops[i];
         auto prevRoute = routes[i];
         auto nextRoute = routes[i + 1];
@@ -98,7 +98,7 @@ std::string executeTicketRequest(const TicketRequest& ticketRequest) {
     ULL lowestPrice = INF;
     
     if(tickets.size() >= 1) {    
-        for(int i = 0; i < tickets.size(); i++) {
+        for(size_t i = 0; i < tickets.size(); i++) {
         
             if(std::get<2>(tickets[i]) >= time) {
                 ULL currPrice = std::get<1>(tickets[i]);
@@ -111,8 +111,8 @@ std::string executeTicketRequest(const TicketRequest& ticketRequest) {
         }
     } 
     else if(tickets.size() >= 2) {
-        for(int i = 0; i < tickets.size(); i++) {
-            for(int j = i; j < tickets.size(); j++) {
+        for(size_t i = 0; i < tickets.size(); i++) {
+            for(size_t j = i; j < tickets.size(); j++) {
             
                 if(std::get<2>(tickets[i]) + std::get<2>(tickets[j]) >= time) {
                     ULL currPrice = std::get<1>(tickets[i]) + std::get<1>(tickets[j]);
@@ -126,9 +126,9 @@ std::string executeTicketRequest(const TicketRequest& ticketRequest) {
         }
     } 
     else if(tickets.size() >= 3) {
-        for(int i = 0; i < tickets.size(); i++) {
-            for(int j = i; j < tickets.size(); j++) {
-                for(int k = j; k < tickets.size(); k++) {
+        for(size_t i = 0; i < tickets.size(); i++) {
+            for(size_t j = i; j < tickets.size(); j++) {
+                for(size_t k = j; k < tickets.size(); k++) {
                     
                     if(std::get<2>(tickets[i]) + std::get<2>(tickets[j]) + std::get<2>(tickets[k]) >= time) {
                         ULL currPrice = std::get<1>(tickets[i]) + std::get<1>(tickets[j]) + std::get<1>(tickets[k]);
