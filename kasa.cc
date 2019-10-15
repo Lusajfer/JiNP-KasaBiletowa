@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <map>
 #include <climits>
+#include <unordered_set>
 
 using ULL = unsigned long long;
 const ULL INF = 1e18 + 10;
@@ -32,9 +33,35 @@ bool checkTicketRequestCommand(const std::string& command) {
     return regex_match(command, reg3);
 }
 
+int timeToMin(std::string time) {
+    std::string hours;
+    std::string mins;
+    hours += time[0];
+    std::string semi = ":";
+    std::string zero = "0";
+    if(time[2] == semi[0]) {
+        hours += time[1];
+        mins += time[3];
+        mins += time[4];
+    }
+    else {
+        mins += time[2];
+        mins += time[3];
+    }
 
-std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command, std::unordered_set<std::string> ticketNameSet, int lineId) {
-    std::pair<bool, std::tuple<std::string, ULL, int>> ticket;
+    if(mins[0] == zero[0]) {
+        return std::stoi(hours)*60 + std::stoi(mins);
+    }
+    else {
+        // TO JEST TO SAMO XD
+        return std::stoi(hours)*60 + std::stoi(mins);
+    }
+}
+
+std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command,
+                                              std::unordered_set<std::string>& ticketNameSet) {
+
+    std::pair<bool, Ticket> ticket;
 
     std::regex reg("[a-zA-Z]([a-zA-Z]|\\s)*|([1-9]\\d*|0)\\.\\d\\d|[1-9][0-9]*");
     auto itBegin = std::sregex_iterator(command.begin(), command.end(), reg);
@@ -47,13 +74,11 @@ std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command, std::u
     int ticketDur;
 
     for (std::sregex_iterator i = itBegin; i != itEnd; ++i) {
-        std::smatch match = *i;                                                 
+        std::smatch match = *i;
         std::string matchStr = match.str();
         if(std::regex_match(matchStr, nameReg)) {
             if(ticketNameSet.find(matchStr) != ticketNameSet.end()) {
-                printErr(lineId, command);
-                ticket.first = false;
-                return ticket;
+                return {false, {}};
             }
             else {
                 ticketNameSet.insert(matchStr);
@@ -63,9 +88,7 @@ std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command, std::u
         else if(std::regex_match(matchStr, priceReg)) {
             matchStr.erase(matchStr.length()-3, 1);
             if(18 < matchStr.length()) {
-                printErr(lineId, command);
-                ticket.first = false;
-                return ticket;
+                return {false, {}};
             }
             else {
                 ticketPrice = std::stoull(matchStr);
@@ -73,24 +96,21 @@ std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command, std::u
         }
         else if(std::regex_match(matchStr, durReg)) {
             if(std::stoi(matchStr) > 60*24) {
-                printErr(lineId, command);
-                ticket.first = false;
-                return ticket;
+                return {false, {}};
             }
             else {
                 ticketPrice = std::stoi(matchStr);
             }
         }
     }
-    
-    std::tuple<std::string, ULL, int> t(ticketName, ticketPrice, ticketDur);
-    ticket.first = true;
-    ticket.second = t;
-    return ticket;
+
+    return {true, {ticketName, ticketPrice, ticketDur}};
 }
 
-std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command, std::unordered_set<std::string> lineNumSet, int lineId) {
-    std::pair<bool, std::pair<std::string, std::vector<std::pair<int, std::string> > > > busRoute;
+std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command,
+                                               std::unordered_set<std::string>& lineNumSet) {
+
+    std::pair<bool, BusRoute> busRoute;
 
     std::string lineNum;
     auto a = command[0];
@@ -103,12 +123,9 @@ std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command, std::
     }
 
     if(lineNumSet.find(lineNum) != lineNumSet.end()) {
-        busRoute.first = false;
-        printErr(lineId, command);
-        //return busRoute;
+        return {false, {}};
     }
-    else
-    {
+    else {
         lineNumSet.insert(lineNum);
         busRoute.second.first = lineNum;
     }
@@ -129,9 +146,7 @@ std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command, std::
         std::string matchStr = match.str();
         if(std::regex_match(matchStr, stopsReg)) {
             if(stopsSet.find(matchStr) != stopsSet.end()) {
-                printErr(lineId, command);
-                busRoute.first = false;
-                return busRoute;
+                return {false, {}};
             }
             else {
                 stopsSet.insert(matchStr);
@@ -144,18 +159,15 @@ std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command, std::
                 mxMins = mins;
             }
             else if(mxMins <= mins) {
-                printErr(lineId, command);
-                busRoute.first = false;
-                return busRoute;
+                return {false, {}};
             }
 
             stopTimes.push_back(mins);
         }
-        std::cout << matchStr << '\n';
     }
 
    std::pair<int, std::string> p;
-    for(int i = 0; i < stopTimes.size(); i++) {
+    for(size_t i = 0; i < stopTimes.size(); i++) {
         p.first = stopTimes[i]; 
         p.second = stops[i];
         busRoute.second.second.push_back(p);
@@ -170,19 +182,14 @@ std::pair<bool, TicketRequest> parseTicketRequestCommand(const std::string& comm
 }
 
 
+void executeBusRoute(const BusRoute& busRoute,
+                     std::map<std::string, std::map<int, std::string>>& busRoutes,
+                     std::map<std::string, std::map<std::string, int>>& busStops) {
 
-// nie mozna zmiennych globalnych
-// using zamiast pisania poteznych typow
-
-std::map<std::string, std::map<int, std::string>> busRoutes;
-std::map<std::string, std::map<std::string, int>> busStops;
-std::vector<Ticket> tickets;
-
-void executeBusRoute(const BusRoute& busRoute) {
     auto name = busRoute.first;
     auto timetable = busRoute.second;
     
-    for(auto p : timetable) {
+    for(const auto& p : timetable) {
         auto time = p.first;
         auto busStop = p.second;
         
@@ -191,11 +198,14 @@ void executeBusRoute(const BusRoute& busRoute) {
     }
 }
 
-void executeNewTicket(const Ticket& ticket) {
+void executeNewTicket(const Ticket& ticket, std::vector<Ticket>& tickets) {
     tickets.push_back(ticket);
 }
 
-std::string executeTicketRequest(const TicketRequest& ticketRequest) {
+std::string executeTicketRequest(const TicketRequest& ticketRequest,
+                                 std::map<std::string, std::map<std::string, int>>& busStops,
+                                 std::vector<Ticket>& tickets) {
+
     int time = 0;
     auto stops = ticketRequest.first;
     auto routes = ticketRequest.second;
@@ -216,7 +226,6 @@ std::string executeTicketRequest(const TicketRequest& ticketRequest) {
         time += prevTime - prevTimestamp + 1;
         prevTimestamp = prevTime;
     }
-    
     
     std::vector<std::string> bestTickets;
     ULL lowestPrice = INF;
@@ -281,6 +290,14 @@ std::string executeTicketRequest(const TicketRequest& ticketRequest) {
 
 
 void getInput() {
+    // tutaj wrzucam "globalne" strukturki (potem mozna je wrzucic do maina)
+    std::unordered_set<std::string> ticketNameSet;
+    std::unordered_set<std::string> lineNumSet;
+
+    std::map<std::string, std::map<int, std::string>> busRoutes;
+    std::map<std::string, std::map<std::string, int>> busStops;
+    std::vector<Ticket> tickets;
+
 
     int lineId = 0;
     std::string line;
@@ -300,9 +317,9 @@ void getInput() {
                 badLine = true;
             }
             else {
-                auto p = parseBusRouteCommand(line);
+                auto p = parseBusRouteCommand(line, lineNumSet);
                 if (p.first)
-                    executeBusRoute(p.second);
+                    executeBusRoute(p.second, busRoutes, busStops);
                 else
                     badLine = true;
             }
@@ -312,9 +329,9 @@ void getInput() {
                 badLine = true;
             }
             else {
-                auto p = parseNewTicketCommand(line);
+                auto p = parseNewTicketCommand(line, ticketNameSet);
                 if(p.first)
-                    executeNewTicket(p.second);
+                    executeNewTicket(p.second, tickets);
                 else
                     badLine = true;
             }
@@ -326,7 +343,7 @@ void getInput() {
             else {
                 auto p = parseTicketRequestCommand(line);
                 if(p.first)
-                    std::cout << executeTicketRequest(p.second) << "\n";
+                    std::cout << executeTicketRequest(p.second, busStops, tickets) << "\n";
                 else
                     badLine = true;
             }
