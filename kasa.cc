@@ -212,7 +212,7 @@ void getInput() {
         }
 
         if(badLine) {
-            std::cerr << "Error in line " << lineId << ": " << line;
+            std::cerr << "Error in line " << lineId << ": " << line << "\n";
         }
     }
 }
