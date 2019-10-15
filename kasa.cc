@@ -33,21 +33,16 @@ bool checkTicketRequestCommand(const std::string& command) {
 }
 
 
-inline void printErr(int lineId, const std::string& line) {
-    std::cerr << "Error in line " << lineId << ": " << line;
+std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command) {
+    return {true, {}};
 }
 
-
-BusRoute parseBusRouteCommand(const std::string& command) {
-
+std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command) {
+    return {true, {}};
 }
 
-Ticket parseNewTicketCommand(const std::string& command) {
-
-}
-
-TicketRequest parseTicketRequestCommand(const std::string& command) {
-
+std::pair<bool, TicketRequest> parseTicketRequestCommand(const std::string& command) {
+    return {true, {}};
 }
 
 
@@ -91,7 +86,7 @@ std::string executeTicketRequest(const TicketRequest& ticketRequest) {
         int nextTime = busStops[currStop][nextRoute];
         
         if(prevTime != nextTime) {
-            return ":-(" + currStop;
+            return ":-( " + currStop;
         }
         
         time += prevTime - prevTimestamp + 1;
@@ -146,19 +141,19 @@ std::string executeTicketRequest(const TicketRequest& ticketRequest) {
                 }
             }
         }
-    } 
-    
-    if(bestTickets.empty()) {
-        // nie znaleziono odpowiedniego biletu lub nie ma biletow
-
-        return false;
     }
-    
-    // wypisac bilety z bestTickets;
 
-    return true;
+    if(bestTickets.empty()) {
+        return ":-|";
+    }
+
+    std::string ret = "!";
+    for(auto t : bestTickets) {
+        ret.append(" " + t);
+    }
+
+    return ret;
 }
-
 
 
 void getInput() {
@@ -174,33 +169,50 @@ void getInput() {
             continue;
         }
 
+        bool badLine = false;
+
         if(isdigit(line[0]) || line[0] == '_' || line[0] == '^') {
             if(!checkBusRouteCommand(line)) {
-                printErr(lineId, line);
-                continue;
+                badLine = true;
             }
-
-            executeBusRoute(parseBusRouteCommand(line));
+            else {
+                auto p = parseBusRouteCommand(line);
+                if (p.first)
+                    executeBusRoute(p.second);
+                else
+                    badLine = true;
+            }
         } 
         else if(isalpha(line[0]) || isspace(line[0])) {
             if(!checkNewTicketCommand(line)) {
-                printErr(lineId, line);
-                continue;
+                badLine = true;
             }
-
-            executeNewTicket(parseNewTicketCommand(line));
+            else {
+                auto p = parseNewTicketCommand(line);
+                if(p.first)
+                    executeNewTicket(p.second);
+                else
+                    badLine = true;
+            }
         }
         else if(line[0] == '?') {
             if(!checkTicketRequestCommand(line)) {
-                printErr(lineId, line);
-                continue;
+                badLine = true;
             }
-
-            std::cout << executeTicketRequest(parseTicketRequestCommand(line));
+            else {
+                auto p = parseTicketRequestCommand(line);
+                if(p.first)
+                    std::cout << executeTicketRequest(p.second) << "\n";
+                else
+                    badLine = true;
+            }
         }
         else {
-            printErr(lineId, line);
-            continue;           
+            badLine = true;
+        }
+
+        if(badLine) {
+            std::cerr << "Error in line " << lineId << ": " << line;
         }
     }
 }
