@@ -33,12 +33,136 @@ bool checkTicketRequestCommand(const std::string& command) {
 }
 
 
-std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command) {
-    return {true, {}};
+std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command, std::unordered_set<std::string> ticketNameSet, int lineId) {
+    std::pair<bool, std::tuple<std::string, ULL, int>> ticket;
+
+    std::regex reg("[a-zA-Z]([a-zA-Z]|\\s)*|([1-9]\\d*|0)\\.\\d\\d|[1-9][0-9]*");
+    auto itBegin = std::sregex_iterator(command.begin(), command.end(), reg);
+    auto itEnd = std::sregex_iterator();
+    std::regex nameReg("[a-zA-Z]([a-zA-Z]|\\s)*");
+    std::regex priceReg("([1-9]\\d*|0)\\.\\d\\d");
+    std::regex durReg("[1-9][0-9]*");
+    std::string ticketName;
+    ULL ticketPrice;
+    int ticketDur;
+
+    for (std::sregex_iterator i = itBegin; i != itEnd; ++i) {
+        std::smatch match = *i;                                                 
+        std::string matchStr = match.str();
+        if(std::regex_match(matchStr, nameReg)) {
+            if(ticketNameSet.find(matchStr) != ticketNameSet.end()) {
+                printErr(lineId, command);
+                ticket.first = false;
+                return ticket;
+            }
+            else {
+                ticketNameSet.insert(matchStr);
+                ticketName = matchStr;
+            }
+        }
+        else if(std::regex_match(matchStr, priceReg)) {
+            matchStr.erase(matchStr.length()-3, 1);
+            if(18 < matchStr.length()) {
+                printErr(lineId, command);
+                ticket.first = false;
+                return ticket;
+            }
+            else {
+                ticketPrice = std::stoull(matchStr);
+            }
+        }
+        else if(std::regex_match(matchStr, durReg)) {
+            if(std::stoi(matchStr) > 60*24) {
+                printErr(lineId, command);
+                ticket.first = false;
+                return ticket;
+            }
+            else {
+                ticketPrice = std::stoi(matchStr);
+            }
+        }
+    }
+    
+    std::tuple<std::string, ULL, int> t(ticketName, ticketPrice, ticketDur);
+    ticket.first = true;
+    ticket.second = t;
+    return ticket;
 }
 
-std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command) {
-    return {true, {}};
+std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command, std::unordered_set<std::string> lineNumSet, int lineId) {
+    std::pair<bool, std::pair<std::string, std::vector<std::pair<int, std::string> > > > busRoute;
+
+    std::string lineNum;
+    auto a = command[0];
+    int x = 0;
+
+    while(std::isdigit(a)) {
+        a = command[x];
+        lineNum += a;
+        x += 1;
+    }
+
+    if(lineNumSet.find(lineNum) != lineNumSet.end()) {
+        busRoute.first = false;
+        printErr(lineId, command);
+        //return busRoute;
+    }
+    else
+    {
+        lineNumSet.insert(lineNum);
+        busRoute.second.first = lineNum;
+    }
+
+    std::regex reg("(5:5[5-9]|([6-9]|1[0-9]|20):\\d\\d|21:1[0-9]|21:2[0-1])|([a-zA-Z]|_|\\^)+");
+    auto itBegin = std::sregex_iterator(command.begin(), command.end(), reg);
+    auto itEnd = std::sregex_iterator();
+    std::regex stopsReg("([a-zA-Z]|_|\\^)+");
+    std::regex timeReg("\\d+:\\d\\d");
+    std::unordered_set<std::string> stopsSet;
+    std::vector<std::string> stops;
+    std::vector<int> stopTimes;
+    int mins;
+    int mxMins = -1;
+ 
+    for (std::sregex_iterator i = itBegin; i != itEnd; ++i) {
+        std::smatch match = *i;                                                 
+        std::string matchStr = match.str();
+        if(std::regex_match(matchStr, stopsReg)) {
+            if(stopsSet.find(matchStr) != stopsSet.end()) {
+                printErr(lineId, command);
+                busRoute.first = false;
+                return busRoute;
+            }
+            else {
+                stopsSet.insert(matchStr);
+                stops.push_back(matchStr);
+            }
+        }
+        else if(std::regex_match(matchStr, timeReg)) {
+            mins = timeToMin(matchStr);
+            if(mxMins == -1) {
+                mxMins = mins;
+            }
+            else if(mxMins <= mins) {
+                printErr(lineId, command);
+                busRoute.first = false;
+                return busRoute;
+            }
+
+            stopTimes.push_back(mins);
+        }
+        std::cout << matchStr << '\n';
+    }
+
+   std::pair<int, std::string> p;
+    for(int i = 0; i < stopTimes.size(); i++) {
+        p.first = stopTimes[i]; 
+        p.second = stops[i];
+        busRoute.second.second.push_back(p);
+    }
+
+    busRoute.first = true;
+    return busRoute;
 }
 
 std::pair<bool, TicketRequest> parseTicketRequestCommand(const std::string& command) {
