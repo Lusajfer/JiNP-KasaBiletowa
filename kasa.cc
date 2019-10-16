@@ -57,14 +57,21 @@ std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command,
 
     std::pair<bool, BusRoute> busRoute;
 
-    std::string lineNum;
+    std::string lineNum = "";
     auto a = command[0];
     int x = 0;
+    std::string zero = "0";
 
     while(std::isdigit(a)) {
         a = command[x];
-        lineNum += a;
+        if(a != zero[0]) {
+            lineNum += a;
+        }
         x += 1;
+    }
+
+    if(lineNum == "") {
+        lineNum = "0";
     }
 
     if(lineNumSet.find(lineNum) != lineNumSet.end()) {
@@ -128,28 +135,34 @@ std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command,
 
     std::pair<bool, Ticket> ticket;
 
-    std::regex reg("[a-zA-Z]([a-zA-Z]|\\s)*|([1-9]\\d*|0)\\.\\d\\d|[1-9][0-9]*");
+    std::string ticketName = "";
+    auto a = command[2];
+    int x = 2;
+    std::string zero = "0";
+
+    while(!std::isdigit(a)) {
+        a = command[x];
+        ticketName += a;
+        x += 1;
+    }
+
+    ticketName.erase(ticketName.end());
+    if(ticketNameSet.find(ticketName) != ticketNameSet.end()) {
+        return {false, {}};
+    }
+
+    std::regex reg("([1-9]\\d*|0)\\.\\d\\d|[1-9][0-9]*");
     auto itBegin = std::sregex_iterator(command.begin(), command.end(), reg);
     auto itEnd = std::sregex_iterator();
-    std::regex nameReg("[a-zA-Z]([a-zA-Z]|\\s)*");
     std::regex priceReg("([1-9]\\d*|0)\\.\\d\\d");
     std::regex durReg("[1-9][0-9]*");
-    std::string ticketName;
     ULL ticketPrice;
     int ticketDur;
 
     for (std::sregex_iterator i = itBegin; i != itEnd; ++i) {
         std::smatch match = *i;
         std::string matchStr = match.str();
-        if(std::regex_match(matchStr, nameReg)) {
-            if(ticketNameSet.find(matchStr) != ticketNameSet.end()) {
-                return {false, {}};
-            }
-            else {
-                ticketName = matchStr;
-            }
-        }
-        else if(std::regex_match(matchStr, priceReg)) {
+        if(std::regex_match(matchStr, priceReg)) {
             matchStr.erase(matchStr.length()-3, 1);
             if(18 < matchStr.length()) {
                 return {false, {}};
