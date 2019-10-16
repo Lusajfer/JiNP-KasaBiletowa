@@ -136,17 +136,13 @@ std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command,
     std::pair<bool, Ticket> ticket;
 
     std::string ticketName = "";
-    auto a = command[2];
-    int x = 2;
-    std::string zero = "0";
+    int x = 0;
 
-    while(!std::isdigit(a)) {
-        a = command[x];
-        ticketName += a;
+    while(!std::isdigit(command[x+1])) {
+        ticketName += command[x];
         x += 1;
     }
 
-    ticketName.erase(ticketName.end());
     if(ticketNameSet.find(ticketName) != ticketNameSet.end()) {
         return {false, {}};
     }
