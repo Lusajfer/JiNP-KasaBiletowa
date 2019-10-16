@@ -199,7 +199,8 @@ void executeNewTicket(const Ticket& ticket, std::vector<Ticket>& tickets) {
 
 std::string executeTicketRequest(const TicketRequest& ticketRequest,
                                  std::map<std::string, std::map<std::string, int>>& busStops,
-                                 std::vector<Ticket>& tickets) {
+                                 std::vector<Ticket>& tickets,
+                                 int& numberOfTickets) {
 
     int time = 0;
     auto stops = ticketRequest.first;
@@ -222,54 +223,39 @@ std::string executeTicketRequest(const TicketRequest& ticketRequest,
         prevTimestamp = prevTime;
     }
     
-    std::vector<std::string> bestTickets;
+    std::vector<Ticket> bestTickets;
     ULL lowestPrice = INF;
-    
-    if(tickets.size() >= 1) {    
-        for(size_t i = 0; i < tickets.size(); i++) {
-        
-            if(std::get<2>(tickets[i]) >= time) {
-                ULL currPrice = std::get<1>(tickets[i]);
-                
-                if(currPrice < lowestPrice) {
-                    lowestPrice = currPrice;
-                    bestTickets = {std::get<0>(tickets[i])};
-                }
-            }
-        }
-    } 
-    else if(tickets.size() >= 2) {
-        for(size_t i = 0; i < tickets.size(); i++) {
-            for(size_t j = i; j < tickets.size(); j++) {
-            
-                if(std::get<2>(tickets[i]) + std::get<2>(tickets[j]) >= time) {
-                    ULL currPrice = std::get<1>(tickets[i]) + std::get<1>(tickets[j]);
-                    
+
+    for(size_t i = 0; i < tickets.size(); i++) {
+        for(size_t j = i; j <= tickets.size(); j++) {
+            for(size_t k = j; k <= tickets.size(); k++) {
+
+                std::vector<Ticket> curr;
+
+                curr.push_back(tickets[i]);
+                if(j != tickets.size())
+                    curr.push_back(tickets[j]);
+                if(k != tickets.size())
+                    curr.push_back(tickets[k]);
+
+                int currTime = 0;
+                for(const auto& t : curr)
+                    currTime += std::get<2>(t);
+
+                if(currTime >= time) {
+                    ULL currPrice = 0;
+                    for(const auto& t : curr)
+                        currPrice += std::get<1>(t);
+
                     if(currPrice < lowestPrice) {
                         lowestPrice = currPrice;
-                        bestTickets = {std::get<0>(tickets[i]), std::get<0>(tickets[j])};
+                        bestTickets = curr;
                     }
                 }
             }
         }
-    } 
-    else if(tickets.size() >= 3) {
-        for(size_t i = 0; i < tickets.size(); i++) {
-            for(size_t j = i; j < tickets.size(); j++) {
-                for(size_t k = j; k < tickets.size(); k++) {
-                    
-                    if(std::get<2>(tickets[i]) + std::get<2>(tickets[j]) + std::get<2>(tickets[k]) >= time) {
-                        ULL currPrice = std::get<1>(tickets[i]) + std::get<1>(tickets[j]) + std::get<1>(tickets[k]);
-                        
-                        if(currPrice < lowestPrice) {
-                            lowestPrice = currPrice;
-                            bestTickets = {std::get<0>(tickets[i]), std::get<0>(tickets[j]), std::get<0>(tickets[k])};
-                        }
-                    }        
-                }
-            }
-        }
     }
+
 
     if(bestTickets.empty()) {
         return ":-|";
@@ -277,8 +263,10 @@ std::string executeTicketRequest(const TicketRequest& ticketRequest,
 
     std::string ret = "!";
     for(auto t : bestTickets) {
-        ret.append(" " + t);
+        ret.append(" " + std::get<0>(t));
     }
+
+    numberOfTickets += (int)bestTickets.size();
 
     return ret;
 }
@@ -296,6 +284,7 @@ void getInput() {
 
     int lineId = 0;
     std::string line;
+    int numberOfTickets = 0;
      
     while(getline(std::cin, line)) {
     
@@ -338,7 +327,7 @@ void getInput() {
             else {
                 auto p = parseTicketRequestCommand(line);
                 if(p.first)
-                    std::cout << executeTicketRequest(p.second, busStops, tickets) << "\n";
+                    std::cout << executeTicketRequest(p.second, busStops, tickets, numberOfTickets) << "\n";
                 else
                     badLine = true;
             }
@@ -351,6 +340,8 @@ void getInput() {
             std::cerr << "Error in line " << lineId << ": " << line << "\n";
         }
     }
+
+    std::cout << numberOfTickets << "\n";
 }
 
 int main() {
