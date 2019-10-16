@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <map>
+#include <unordered_map>
 #include <climits>
 #include <unordered_set>
 
@@ -17,9 +18,11 @@ using BusRoute = std::pair<std::string, std::vector<std::pair<int, std::string>>
 using Ticket = std::tuple<std::string, ULL, int>;
 using TicketRequest = std::pair<std::vector<std::string>, std::vector<std::string>>;
 
-const std::regex reg1("\\d+(\\s(5:5[5-9]|([6-9]|1[0-9]|20):\\d\\d|21:1[0-9]|21:2[0-1])\\s([a-zA-Z]|\\^)([a-zA-Z]|\\s|\\^)*)+");
-const std::regex reg2("[a-zA-Z]([a-zA-Z]|\\s)*\\s([1-9]\\d*|0)\\.\\d\\d\\s[1-9][0-9]*");
+const std::regex reg1("\\d+(\\s(5:5[5-9]|([6-9]|1[0-9]|20):\\d\\d|21:1[0-9]|21:2[0-1])\\s([a-zA-Z]|_|\\^)+)+");
+const std::regex reg2("([a-zA-Z]|\\s)+\\s([1-9]\\d*|0)\\.\\d\\d\\s[1-9][0-9]*");
 const std::regex reg3("\\?(\\s([a-zA-Z]|_|\\^)+\\s\\d+)+\\s([a-zA-Z]|\\^|_)+");
+
+std::unordered_map<std::string, std::unordered_set<std::string>> busLines;
 
 bool checkBusRouteCommand(const std::string& command) {
     return regex_match(command, reg1);
@@ -58,16 +61,14 @@ std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command,
     std::pair<bool, BusRoute> busRoute;
 
     std::string lineNum = "";
-    auto a = command[0];
     int x = 0;
     std::string zero = "0";
 
-    while(std::isdigit(a)) {
-        a = command[x];
-        if(a != zero[0]) {
-            lineNum += a;
+    while(std::isdigit(command[x])) {
+        if(command[x] != zero[0]) {
+            lineNum += command[x];
         }
-        x += 1;
+        x++;
     }
 
     if(lineNum == "") {
@@ -126,6 +127,10 @@ std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command,
         busRoute.second.second.push_back(p);
     }
 
+    for(const auto& p : busRoute.second.second) {
+        busLines[busRoute.second.first].insert(p.second);
+    }
+
     busRoute.first = true;
     return busRoute;
 }
@@ -181,8 +186,62 @@ std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command,
     return {true, {ticketName, ticketPrice, ticketDur}};
 }
 
-std::pair<bool, TicketRequest> parseTicketRequestCommand(const std::string& command) {
-    return {true, {}};
+std::pair<bool, TicketRequest> parseTicketRequestCommand(const std::string& command,
+                                                         std::unordered_set<std::string>& lineNumSet) {
+
+
+    std::regex reg("\\d+|([a-zA-Z]|_|\\^)+");
+    auto itBegin = std::sregex_iterator(command.begin(), command.end(), reg);
+    auto itEnd = std::sregex_iterator();
+    std::regex lineNumReg("\\d+");
+    std::regex stopNameReg("([a-zA-Z]|_|\\^)+");
+    std::vector<std::string> stops;
+    std::vector<std::string> lineNumbers;
+    std::string zero = "0";
+
+    for (std::sregex_iterator i = itBegin; i != itEnd; ++i) {
+        std::smatch match = *i;
+        std::string matchStr = match.str();
+
+        if(std::regex_match(matchStr, lineNumReg)) {
+            std::string lineNum = "";
+            for(int i = 0; i < matchStr.length(); i++) {
+                if(matchStr[i] != zero[0]) {
+                    lineNum += matchStr[i];
+                }
+            }
+
+            if(lineNum == "") {
+                lineNum = "0";
+            }
+
+            if(lineNumSet.find(lineNum) == lineNumSet.end()) {
+                for(auto s : lineNumSet)
+                    std::cout<< "[" << s <<"] XD " <<lineNum <<"\n";
+
+                return {false, {}};
+            }
+            else {
+                lineNumbers.push_back(lineNum);
+            }
+        }
+        else if(std::regex_match(matchStr, stopNameReg)) {
+            stops.push_back(matchStr);
+        }
+    }
+
+    for(size_t i = 0; i < lineNumbers.size(); i++) {
+        if(busLines[lineNumbers[i]].find(stops[i]) == busLines[lineNumbers[i]].end()) {
+            return {false, {}};
+        }
+    }
+
+    if(busLines[lineNumbers[lineNumbers.size()-1]].find(stops[stops.size()-1]) == busLines[lineNumbers[lineNumbers.size()-1]].end()) {
+        return {false, {}};
+    }
+
+
+    return {true, {stops, lineNumbers}};
 }
 
 
@@ -367,11 +426,10 @@ void getInput() {
                 badLine = true;
             }
             else {
-                auto p = parseTicketRequestCommand(line);
+                auto p = parseTicketRequestCommand(line, lineNumSet);
                 if(p.first) {
-                    // todo odkomentowac po napisaniu parsera
-                    //std::cout << executeTicketRequest(p.second, busStops, tickets, numberOfTickets) << "\n";
-                    //printTicketRequest(p.second);
+                    std::cout << executeTicketRequest(p.second, busStops, tickets, numberOfTickets) << "\n";
+                    printTicketRequest(p.second);
                 }
                 else
                     badLine = true;
