@@ -4,7 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/Users/a1/Desktop/chuj/JiNP-KasaBiletowa/kasa.cc" "/Users/a1/Desktop/chuj/JiNP-KasaBiletowa/cmake-build-debug/CMakeFiles/kasa.dir/kasa.cc.o"
+  "/home/cezary/CLionProjects/JiNP-KasaBiletowa/gen.cpp" "/home/cezary/CLionProjects/JiNP-KasaBiletowa/cmake-build-debug/CMakeFiles/kasa.dir/gen.cpp.o"
+  "/home/cezary/CLionProjects/JiNP-KasaBiletowa/kasa.cc" "/home/cezary/CLionProjects/JiNP-KasaBiletowa/cmake-build-debug/CMakeFiles/kasa.dir/kasa.cc.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
