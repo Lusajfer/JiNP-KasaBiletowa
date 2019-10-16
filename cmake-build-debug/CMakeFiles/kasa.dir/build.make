@@ -60,15 +60,15 @@ include CMakeFiles/kasa.dir/flags.make
 CMakeFiles/kasa.dir/kasa.cc.o: CMakeFiles/kasa.dir/flags.make
 CMakeFiles/kasa.dir/kasa.cc.o: ../kasa.cc
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/a1/Desktop/chuj/JiNP-KasaBiletowa/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/kasa.dir/kasa.cc.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/kasa.dir/kasa.cc.o -c /Users/a1/Desktop/chuj/JiNP-KasaBiletowa/kasa.cc
+	/usr/local/Cellar/gcc/9.2.0_1/bin/g++-9  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/kasa.dir/kasa.cc.o -c /Users/a1/Desktop/chuj/JiNP-KasaBiletowa/kasa.cc
 
 CMakeFiles/kasa.dir/kasa.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kasa.dir/kasa.cc.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/a1/Desktop/chuj/JiNP-KasaBiletowa/kasa.cc > CMakeFiles/kasa.dir/kasa.cc.i
+	/usr/local/Cellar/gcc/9.2.0_1/bin/g++-9 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/a1/Desktop/chuj/JiNP-KasaBiletowa/kasa.cc > CMakeFiles/kasa.dir/kasa.cc.i
 
 CMakeFiles/kasa.dir/kasa.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kasa.dir/kasa.cc.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a1/Desktop/chuj/JiNP-KasaBiletowa/kasa.cc -o CMakeFiles/kasa.dir/kasa.cc.s
+	/usr/local/Cellar/gcc/9.2.0_1/bin/g++-9 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/a1/Desktop/chuj/JiNP-KasaBiletowa/kasa.cc -o CMakeFiles/kasa.dir/kasa.cc.s
 
 # Object files for target kasa
 kasa_OBJECTS = \
