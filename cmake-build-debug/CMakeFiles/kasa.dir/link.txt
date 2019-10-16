@@ -1,1 +1,1 @@
-/usr/bin/c++  -g  -rdynamic CMakeFiles/kasa.dir/kasa.cc.o CMakeFiles/kasa.dir/gen.cpp.o  -o kasa 
+/usr/bin/c++  -g  -rdynamic CMakeFiles/kasa.dir/kasa.cc.o  -o kasa 

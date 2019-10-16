@@ -1,6 +1,5 @@
 file(REMOVE_RECURSE
   "CMakeFiles/kasa.dir/kasa.cc.o"
-  "CMakeFiles/kasa.dir/gen.cpp.o"
   "kasa.pdb"
   "kasa"
 )

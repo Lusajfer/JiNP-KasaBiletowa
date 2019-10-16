@@ -123,33 +123,6 @@ kasa/fast:
 	$(MAKE) -f CMakeFiles/kasa.dir/build.make CMakeFiles/kasa.dir/build
 .PHONY : kasa/fast
 
-gen.o: gen.cpp.o
-
-.PHONY : gen.o
-
-# target to build an object file
-gen.cpp.o:
-	$(MAKE) -f CMakeFiles/kasa.dir/build.make CMakeFiles/kasa.dir/gen.cpp.o
-.PHONY : gen.cpp.o
-
-gen.i: gen.cpp.i
-
-.PHONY : gen.i
-
-# target to preprocess a source file
-gen.cpp.i:
-	$(MAKE) -f CMakeFiles/kasa.dir/build.make CMakeFiles/kasa.dir/gen.cpp.i
-.PHONY : gen.cpp.i
-
-gen.s: gen.cpp.s
-
-.PHONY : gen.s
-
-# target to generate assembly for a file
-gen.cpp.s:
-	$(MAKE) -f CMakeFiles/kasa.dir/build.make CMakeFiles/kasa.dir/gen.cpp.s
-.PHONY : gen.cpp.s
-
 kasa.o: kasa.cc.o
 
 .PHONY : kasa.o
@@ -186,9 +159,6 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... kasa"
 	@echo "... edit_cache"
-	@echo "... gen.o"
-	@echo "... gen.i"
-	@echo "... gen.s"
 	@echo "... kasa.o"
 	@echo "... kasa.i"
 	@echo "... kasa.s"

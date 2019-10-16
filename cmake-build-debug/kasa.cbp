@@ -84,9 +84,6 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/cezary/CLionProjects/JiNP-KasaBiletowa/gen.cpp">
-			<Option target="kasa"/>
-		</Unit>
 		<Unit filename="/home/cezary/CLionProjects/JiNP-KasaBiletowa/kasa.cc">
 			<Option target="kasa"/>
 		</Unit>

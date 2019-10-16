@@ -107,10 +107,7 @@ std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command,
         }
         else if(std::regex_match(matchStr, timeReg)) {
             mins = timeToMin(matchStr);
-            if(lastMins == -1) {
-                lastMins = mins;
-            }
-            else if(lastMins >= mins) {
+            if(lastMins >= mins) {
                 return {false, {}};
             }
             stopTimes.push_back(mins);
@@ -188,8 +185,7 @@ std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command,
 }
 
 std::pair<bool, TicketRequest> parseTicketRequestCommand(const std::string& command,
-                                                         std::unordered_set<std::string>& lineNumSet) {
-
+                                                         const std::unordered_set<std::string>& lineNumSet) {
 
     std::regex reg("\\d+|([a-zA-Z]|_|\\^)+");
     auto itBegin = std::sregex_iterator(command.begin(), command.end(), reg);
@@ -206,7 +202,7 @@ std::pair<bool, TicketRequest> parseTicketRequestCommand(const std::string& comm
 
         if(std::regex_match(matchStr, lineNumReg)) {
             std::string lineNum = "";
-            for(int i = 0; i < matchStr.length(); i++) {
+            for(size_t i = 0; i < matchStr.length(); i++) {
                 if(matchStr[i] != zero[0]) {
                     lineNum += matchStr[i];
                 }
@@ -217,9 +213,6 @@ std::pair<bool, TicketRequest> parseTicketRequestCommand(const std::string& comm
             }
 
             if(lineNumSet.find(lineNum) == lineNumSet.end()) {
-                for(auto s : lineNumSet)
-                    std::cout<< "[" << s <<"] XD " <<lineNum <<"\n";
-
                 return {false, {}};
             }
             else {
@@ -239,6 +232,12 @@ std::pair<bool, TicketRequest> parseTicketRequestCommand(const std::string& comm
 
     if(busLines[lineNumbers[lineNumbers.size()-1]].find(stops[stops.size()-1]) == busLines[lineNumbers[lineNumbers.size()-1]].end()) {
         return {false, {}};
+    }
+
+    for(size_t i = 1; i < stops.size(); i++) {
+        if(stops[i] == stops[i - 1]) {
+            return {false, {}};
+        }
     }
 
 
@@ -271,27 +270,27 @@ std::string executeTicketRequest(const TicketRequest& ticketRequest,
                                  std::vector<Ticket>& tickets,
                                  int& numberOfTickets) {
 
-    int time = 0;
     auto stops = ticketRequest.first;
     auto routes = ticketRequest.second;
-    int prevTimestamp = busStops[stops[0]][routes[0]];
-    
-    for(size_t i = 0; i < stops.size(); i++) {
+
+    for(size_t i = 1; i < routes.size(); i++) {
         auto currStop = stops[i];
-        auto prevRoute = routes[i];
-        auto nextRoute = routes[i + 1];
+        auto prevRoute = routes[i - 1];
+        auto nextRoute = routes[i];
         
         int prevTime = busStops[currStop][prevRoute];
         int nextTime = busStops[currStop][nextRoute];
         
-        if(prevTime != nextTime) {
+        if(prevTime < nextTime) {
             return ":-( " + currStop;
         }
-        
-        time += prevTime - prevTimestamp + 1;
-        prevTimestamp = prevTime;
+        else if(prevTime > nextTime) {
+            return "";
+        }
     }
-    
+
+    int time = busStops[stops.back()][routes.back()] - busStops[stops[0]][routes[0]] + 1;
+
     std::vector<Ticket> bestTickets;
     ULL lowestPrice = INF;
 
@@ -325,29 +324,24 @@ std::string executeTicketRequest(const TicketRequest& ticketRequest,
         }
     }
 
-
     if(bestTickets.empty()) {
         return ":-|";
     }
 
     std::string ret = "!";
     for(auto t : bestTickets) {
-        ret.append(" " + std::get<0>(t));
+        ret.append(" " + std::get<0>(t) + ";");
     }
+    ret.pop_back();
 
     numberOfTickets += (int)bestTickets.size();
 
     return ret;
 }
 
-/// FUNKCJE DO DEBUGOWANIA
-//using BusRoute = std::pair<std::string, std::vector<std::pair<int, std::string>>>;
-//using Ticket = std::tuple<std::string, ULL, int>;
-//using TicketRequest = std::pair<std::vector<std::string>, std::vector<std::string>>;
-
 void printBusRoute(BusRoute busRoute) {
     std::cout << "BusRoute command: ";
-    std::cout << busRoute.first;
+    std::cout << busRoute.first << " ";
     for(auto p : busRoute.second) {
         std::cout << p.first << " " << p.second << " ";
     }
@@ -359,15 +353,14 @@ void printTicket(Ticket ticket) {
 }
 
 void printTicketRequest(TicketRequest ticketRequest) {
+    std::cout << ticketRequest.first.size() << " " << ticketRequest.second.size() << "\n";
     std::cout << "TicketRequest: ";
-    for(int i = 0; i < (int)ticketRequest.first.size(); i++) {
+    for(int i = 0; i < (int)ticketRequest.second.size(); i++) {
         std::cout << ticketRequest.first[i] << " " << ticketRequest.second[i] << " ";
     }
     std::cout << ticketRequest.first.back();
     std::cout << "\n";
 }
-
-/// koniec funkcji do debugowania
 
 
 void getInput() {
@@ -402,7 +395,7 @@ void getInput() {
                 auto p = parseBusRouteCommand(line, lineNumSet);
                 if (p.first) {
                     executeBusRoute(p.second, busRoutes, busStops);
-                    printBusRoute(p.second);
+                    //printBusRoute(p.second);
                 }
                 else
                     badLine = true;
@@ -416,7 +409,7 @@ void getInput() {
                 auto p = parseNewTicketCommand(line, ticketNameSet);
                 if(p.first) {
                     executeNewTicket(p.second, tickets);
-                    printTicket(p.second);
+                    //printTicket(p.second);
                 }
                 else
                     badLine = true;
@@ -429,8 +422,12 @@ void getInput() {
             else {
                 auto p = parseTicketRequestCommand(line, lineNumSet);
                 if(p.first) {
-                    std::cout << executeTicketRequest(p.second, busStops, tickets, numberOfTickets) << "\n";
-                    printTicketRequest(p.second);
+                    std::string ticketRequestOutput = executeTicketRequest(p.second, busStops, tickets, numberOfTickets);
+                    if(ticketRequestOutput == "")
+                        badLine = true;
+                    else
+                        std::cout << ticketRequestOutput << "\n";
+                    //printTicketRequest(p.second);
                 }
                 else
                     badLine = true;
