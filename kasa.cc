@@ -124,8 +124,8 @@ std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command,
         busRoute.second.second.push_back(p);
     }
 
-    for(const auto& p : busRoute.second.second) {
-        busLines[busRoute.second.first].insert(p.second);
+    for(const auto& pp : busRoute.second.second) {
+        busLines[busRoute.second.first].insert(pp.second);
     }
 
     busRoute.first = true;
