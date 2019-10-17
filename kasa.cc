@@ -49,10 +49,12 @@ std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command,
     int x = 0;
     std::string zero = "0";
 
+    while(command[x] == zero[0]) {
+        x++;
+    }
+
     while(std::isdigit(command[x])) {
-        if(command[x] != zero[0]) {
-            lineNum += command[x];
-        }
+        lineNum += command[x];
         x++;
     }
 
@@ -135,10 +137,10 @@ std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command,
         return {false, {}};
     }
 
-    std::regex reg("([1-9]\\d*|0)\\.\\d\\d|[1-9][0-9]*");
+    std::regex reg("\\d+\\.\\d\\d|[1-9][0-9]*");
     auto itBegin = std::sregex_iterator(command.begin(), command.end(), reg);
     auto itEnd = std::sregex_iterator();
-    std::regex priceReg("([1-9]\\d*|0)\\.\\d\\d");
+    std::regex priceReg("\\d+\\.\\d\\d");
     std::regex durReg("[1-9][0-9]*");
     ULL ticketPrice;
     int ticketDur;
@@ -148,6 +150,20 @@ std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command,
         std::string matchStr = match.str();
         if(std::regex_match(matchStr, priceReg)) {
             matchStr.erase(matchStr.length()-3, 1);
+            int x = 0;
+            std::string zero = "0";
+            std::string dot = ".";
+
+            while (matchStr[x] == zero[0]) {
+                x++;
+            }
+
+            matchStr.erase(0, x);
+
+            if(matchStr[0] == dot[0]) {
+                matchStr = "0"+matchStr;
+            }
+
             if(18 < matchStr.length()) {
                 return {false, {}};
             }
@@ -187,22 +203,25 @@ std::pair<bool, TicketRequest> parseTicketRequestCommand(const std::string& comm
         std::string matchStr = match.str();
 
         if(std::regex_match(matchStr, lineNumReg)) {
-            std::string lineNum = "";
-            for(size_t i = 0; i < matchStr.length(); i++) {
-                if(matchStr[i] != zero[0]) {
-                    lineNum += matchStr[i];
-                }
+            int x = 0;
+            std::string zero = "0";
+            std::string dot = ".";
+
+            while (matchStr[x] == zero[0]) {
+                x++;
             }
 
-            if(lineNum == "") {
-                lineNum = "0";
+            matchStr.erase(0, x);
+
+            if(matchStr == "") {
+                matchStr = "0";
             }
 
-            if(lineNumSet.find(lineNum) == lineNumSet.end()) {
+            if(lineNumSet.find(matchStr) == lineNumSet.end()) {
                 return {false, {}};
             }
             else {
-                lineNumbers.push_back(lineNum);
+                lineNumbers.push_back(matchStr);
             }
         }
         else if(std::regex_match(matchStr, stopNameReg)) {
@@ -334,7 +353,7 @@ int main() {
 
     // regexy do wstepnego sprawdzenia linijki
     const std::regex regBusRouteCommand("\\d+( (5:5[5-9]|([6-9]|1[0-9]|20):[0-5]\\d|21:1[0-9]|21:2[0-1]) ([a-zA-Z]|_|\\^)+)+");
-    const std::regex regTicketCommand("([a-zA-Z]| )+ ([1-9]\\d*|0)\\.\\d\\d [1-9][0-9]*");
+    const std::regex regTicketCommand("([a-zA-Z]| )+ \\d+\\.\\d\\d [1-9][0-9]*");
     const std::regex regTicketRequestCommand("\\?( ([a-zA-Z]|_|\\^)+ \\d+)+ ([a-zA-Z]|\\^|_)+");
 
     // struktury do parsowania wejscia
