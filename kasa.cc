@@ -19,7 +19,7 @@ using BusRoute = std::pair<std::string, std::vector<std::pair<int, std::string>>
 using Ticket = std::tuple<std::string, ULL, int>;
 using TicketRequest = std::pair<std::vector<std::string>, std::vector<std::string>>;
 
-int timeToMin(std::string time) {
+int timeToMin(const std::string& time) {
     std::string hours;
     std::string mins;
     hours += time[0];
@@ -45,7 +45,7 @@ std::pair<bool, BusRoute> parseBusRouteCommand(const std::string& command,
 
     std::pair<bool, BusRoute> busRoute;
 
-    std::string lineNum = "";
+    std::string lineNum;
     int x = 0;
     std::string zero = "0";
 
@@ -137,11 +137,11 @@ std::pair<bool, Ticket> parseNewTicketCommand(const std::string& command,
         return {false, {}};
     }
 
-    std::regex reg("\\d+\\.\\d\\d|[1-9][0-9]*");
+    const std::regex reg("\\d+\\.\\d\\d|[1-9][0-9]*");
     auto itBegin = std::sregex_iterator(command.begin(), command.end(), reg);
     auto itEnd = std::sregex_iterator();
-    std::regex priceReg("\\d+\\.\\d\\d");
-    std::regex durReg("[1-9][0-9]*");
+    const std::regex priceReg("\\d+\\.\\d\\d");
+    const std::regex durReg("[1-9][0-9]*");
     ULL ticketPrice;
     int ticketDur;
 
@@ -298,12 +298,12 @@ std::string executeTicketRequest(const TicketRequest& ticketRequest,
         }
     }
 
-
     int time = busStops[stops.back()][routes.back()] - busStops[stops[0]][routes[0]] + 1;
 
     std::vector<Ticket> bestTickets;
     ULL lowestPrice = INF;
 
+    // sprawdzenie kazdej kombinacji 3 biletow
     for(size_t i = 0; i < tickets.size(); i++) {
         for(size_t j = i; j <= tickets.size(); j++) {
             for(size_t k = j; k <= tickets.size(); k++) {
