@@ -18,9 +18,9 @@ using BusRoute = std::pair<std::string, std::vector<std::pair<int, std::string>>
 using Ticket = std::tuple<std::string, ULL, int>;
 using TicketRequest = std::pair<std::vector<std::string>, std::vector<std::string>>;
 
-const std::regex reg1("\\d+(\\s(5:5[5-9]|([6-9]|1[0-9]|20):\\d\\d|21:1[0-9]|21:2[0-1])\\s([a-zA-Z]|_|\\^)+)+");
-const std::regex reg2("([a-zA-Z]|\\s)+\\s([1-9]\\d*|0)\\.\\d\\d\\s[1-9][0-9]*");
-const std::regex reg3("\\?(\\s([a-zA-Z]|_|\\^)+\\s\\d+)+\\s([a-zA-Z]|\\^|_)+");
+const std::regex reg1("\\d+( (5:5[5-9]|([6-9]|1[0-9]|20):[0-5]\\d|21:1[0-9]|21:2[0-1]) ([a-zA-Z]|_|\\^)+)+");
+const std::regex reg2("([a-zA-Z]| )+ ([1-9]\\d*|0)\\.\\d\\d [1-9][0-9]*");
+const std::regex reg3("\\?( ([a-zA-Z]|_|\\^)+ \\d+)+ ([a-zA-Z]|\\^|_)+");
 
 std::unordered_map<std::string, std::unordered_set<std::string>> busLines;
 
@@ -288,6 +288,13 @@ std::string executeTicketRequest(const TicketRequest& ticketRequest,
             return "";
         }
     }
+
+    if(routes.size() == 1) {
+        if(busStops[stops.back()][routes.back()] < busStops[stops[0]][routes[0]]) {
+            return "";
+        }
+    }
+
 
     int time = busStops[stops.back()][routes.back()] - busStops[stops[0]][routes[0]] + 1;
 
